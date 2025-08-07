@@ -1,0 +1,55 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+        
+
+model User {
+  id       String   @id @default(cuid())
+  name     String
+  email    String   @unique
+  password String
+  userType String   @default("agency") // "agency" ou "client"
+  creatives Creative[]
+  empresas Empresa[]
+}
+
+model Empresa {
+  id        String   @id @default(cuid())
+  nome      String
+  descricao String?
+  logo      String?   // URL da logo da empresa
+  clienteEmail String // E-mail do cliente da empresa
+  ativa     Boolean  @default(true)
+  createdBy User     @relation(fields: [createdById], references: [id])
+  createdById String
+  creatives Creative[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
+}
+
+model Creative {
+  id         String   @id @default(cuid())
+  url        String
+  fileName   String
+  titulo     String?  // Título do criativo
+  status     String   @default("pendente")
+  comentario String?  // Campo antigo mantido para compatibilidade
+  comentarios String? // JSON string com array de comentários com timestamp
+  legenda    String?
+  tipo       String?  @default("post")
+  arquivos   String?  // JSON string com array de arquivos para carrosséis
+  versoes    String?  // JSON string com array de versões
+  deletedAt  DateTime? // Soft delete - quando foi deletado
+  uploadedBy User     @relation(fields: [uploadedById], references: [id])
+  uploadedById String
+  empresa    Empresa?  @relation(fields: [empresaId], references: [id])
+  empresaId  String?   // Relacionamento opcional com empresa
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt @default(now())
+}
