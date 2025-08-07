@@ -1,13 +1,15 @@
-# Dockerfile
-FROM node:18
+# Etapa 1: build da aplicação
+FROM node:18-alpine
 
 WORKDIR /app
 
-COPY package*.json ./
+COPY package.json package-lock.json ./
 RUN npm install
 
 COPY . .
 
+RUN npx prisma generate
+
 EXPOSE 8080
 
-CMD ["npm", "start"] 
+CMD ["node", "server.js"]
